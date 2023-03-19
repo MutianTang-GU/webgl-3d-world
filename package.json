@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "webpack": "webpack",
+    "build-dev": "webpack --mode=development ./world.js && cp index.html dist/",
+    "build": "webpack --mode=production ./world.js && cp index.html dist/"
+  },
+  "devDependencies": {
+    "gl-matrix": "^3.4.3",
+    "raw-loader": "^4.0.2",
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1"
+  }
+}
