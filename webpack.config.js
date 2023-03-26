@@ -1,13 +1,23 @@
-module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.(vert|frag)$/i,
-        use: "raw-loader",
-      },{
-        test: /\.glsl$/,
-        loader: 'webpack-glsl-loader'
-    }
-    ],
-  },
+module.exports = (env, argv) => {
+  return {
+    module: {
+      rules: [
+        {
+          test: /\.glsl$/,
+          use: {
+            loader: "webpack-glsl-minify",
+            options: {
+              esModule: true,
+              includesOnly: argv.mode === "development",
+              preserveUniforms: true,
+              nomangle: ["transpose"],
+            },
+          },
+        },
+      ],
+    },
+    resolve: {
+      extensions: [".glsl"],
+    },
+  };
 };

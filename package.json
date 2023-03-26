@@ -1,13 +1,19 @@
 {
   "scripts": {
     "webpack": "webpack",
-    "build-dev": "webpack --mode=development ./world.js && cp index.html dist/",
-    "build": "webpack --mode=production ./world.js && cp index.html dist/"
+    "build:html": "html-minifier-terser -o dist/index.html --collapse-whitespace --remove-comments --minify-css true index.html",
+    "build:js": "webpack --mode=production ./world.js",
+    "build": "npm run build:html && npm run build:js",
+    "dev": "cp index.html dist/index.html && webpack --mode=development ./world.js"
   },
   "devDependencies": {
-    "gl-matrix": "^3.4.3",
-    "raw-loader": "^4.0.2",
+    "html-minifier-terser": "^7.1.0",
+    "live-server": "^1.2.2",
     "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "webpack-cli": "^5.0.1",
+    "webpack-glsl-minify": "^1.5.0"
+  },
+  "dependencies": {
+    "gl-matrix": "^3.4.3"
   }
 }
