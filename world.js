@@ -148,7 +148,11 @@ class World {
     helper.setUniform("projMatrix", projectionMatrix);
     helper.setUniform("ambientLightColor", [0.6, 0.6, 0.6]);
     helper.setUniform("diffuseLightColor", [0.8, 0.8, 0.8]);
-    helper.setUniform("lightDirection", [1, 2, 5]);
+    helper.setUniform("lightDirection", [
+      Math.sin(0.0005 * time),
+      .5,
+      Math.cos(0.0005 * time),
+    ]);
 
     for (const glObject of this.objects) {
       glObject.update(deltaTime, time);
@@ -156,7 +160,7 @@ class World {
       helper.setUniform("viewMatrix", glObject.modelViewMatrix);
       helper.setUniform("modelToWorldMatrix", glObject.modelWorldMatrix);
       helper.setUniform("materialColor", glObject.materialColor);
-      helper.drawElements(glObject.indices.length, glObject);
+      helper.drawElements(glObject.indices.length);
     }
 
     requestAnimationFrame(time => this.draw(time));
