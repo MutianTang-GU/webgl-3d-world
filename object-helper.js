@@ -7,7 +7,7 @@ export default class {
    * @param {Iterable<number>} modelViewMatrix
    * @param {Iterable<number>} modelWorldMatrix
    * @param {Array.<number>} materialColor
-   * @param {function(GlObject): void} updateFunc
+   * @param {function(GlObject, DOMHighResTimeStamp): void} updateFunc
    */
   constructor(
     vertices,
@@ -24,10 +24,13 @@ export default class {
     this.modelViewMatrix = modelViewMatrix;
     this.modelWorldMatrix = modelWorldMatrix;
     this.materialColor = materialColor;
-    this.updateFunc = updateFunc;
+    this.updateFunc = updateFunc ?? ((obj, deltaTime, time) => {});
   }
 
-  update() {
-    this.updateFunc(this);
+  /**
+   * @param {DOMHighResTimeStamp} deltaTime
+   */
+  update(deltaTime, time) {
+    this.updateFunc(this, deltaTime, time);
   }
 }

@@ -15,8 +15,13 @@ export default class DirectedPoint {
     return [
       Math.sin(this.longitude) * Math.cos(this.latitude),
       Math.sin(this.latitude),
-      -Math.cos(this.longitude) * Math.cos(this.latitude)
+      -Math.cos(this.longitude) * Math.cos(this.latitude),
     ];
+  }
+  reset() {
+    this.position = [0, 0, 0];
+    this.longitude = 0;
+    this.latitude = 0;
   }
   forward(d) {
     this.position[0] += d * Math.sin(this.longitude) * Math.cos(this.latitude);
@@ -47,5 +52,21 @@ export default class DirectedPoint {
   }
   turnRight(angle) {
     this.longitude += angle;
+  }
+  tiltUp(angle) {
+    this.latitude += angle;
+    if (this.latitude > Math.PI / 2) {
+      this.latitude = Math.PI / 2;
+      return false;
+    }
+    return true;
+  }
+  tiltDown(angle) {
+    this.latitude -= angle;
+    if (this.latitude < -Math.PI / 2) {
+      this.latitude = -Math.PI / 2;
+      return false;
+    }
+    return true;
   }
 }

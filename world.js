@@ -1,4 +1,4 @@
-import { cube, ring } from "./simpleObjectLibrary.js";
+import worldObjects from "./objects/index.js";
 import { mat4 } from "gl-matrix";
 import Helper from "./webgl-helper.js";
 import GlObject from "./object-helper.js";
@@ -65,68 +65,68 @@ class World {
         case "KeyJ":
         case "KeyQ":
         case "ArrowLeft":
-          this.camera.turnLeft(Math.PI / 12 /* 30 */);
+          this.camera.turnLeft(Math.PI / 24); // 15 degrees
           break;
         case "KeyL":
         case "KeyE":
         case "ArrowRight":
-          this.camera.turnRight(Math.PI / 12 /* 30 */);
+          this.camera.turnRight(Math.PI / 24); // 15 degrees
+          break;
+        case "ArrowUp":
+          this.camera.tiltUp(Math.PI / 48); // 7.5 degrees
+          break;
+        case "ArrowDown":
+          this.camera.tiltDown(Math.PI / 48); // 7.5 degrees
+          break;
+        case "KeyR":
+          this.camera.reset();
           break;
       }
-      this.draw(); //delete this after animation is implemented
     });
   }
 
   createObjects() {
     const gl = this.gl;
+    let vertices_concat = new Float32Array();
+    let normals_concat = new Float32Array();
+    let indices_concat = new Uint16Array();
+    let offset = 0;
 
-    {
-      const {
-        vertexPositions: vertices,
-        vertexNormals: normals,
-        indices: indices,
-      } = cube(2);
+    for (let obj of worldObjects) {
+      vertices_concat = new Float32Array([...vertices_concat, ...obj.vertices]);
+      normals_concat = new Float32Array([...normals_concat, ...obj.normals]);
+      indices_concat = new Uint16Array([
+        ...indices_concat,
+        ...obj.indices.map(index => index + offset),
+      ]);
+      offset += obj.vertices.length / 3;
 
-      let modelViewMatrix = mat4.create();
-      mat4.translate(modelViewMatrix, modelViewMatrix, [0, 0, -6]);
-      mat4.rotateX(modelViewMatrix, modelViewMatrix, (30 / 180) * Math.PI);
-      mat4.rotateY(modelViewMatrix, modelViewMatrix, (30 / 180) * Math.PI);
-
-      let modelWorldMatrix = mat4.create();
-
-      const materialColor = [0.8, 0.2, 0.1];
-
-      this.helper.bufferData(
-        vertices,
-        normals,
-        indices,
-        "vertPosition",
-        "vertNormal"
-      );
-
-      this.objects.push(
-        new GlObject(
-          vertices,
-          normals,
-          indices,
-          modelViewMatrix,
-          modelWorldMatrix,
-          materialColor,
-          obj => {}
-        )
-      );
+      this.objects.push(obj);
     }
+
+    this.helper.bufferData(
+      vertices_concat,
+      normals_concat,
+      indices_concat,
+      "vertPosition",
+      "vertNormal"
+    );
   }
 
-  draw() {
+  /**
+   *
+   * @param {DOMHighResTimeStamp} time
+   */
+  draw(time) {
     const gl = this.gl;
     const helper = this.helper;
+    if (this.previousTime === undefined) {
+      this.previousTime = time;
+    }
+    const deltaTime = time - this.previousTime;
+    this.previousTime = time;
 
-    // clear the canvas
-    gl.clearDepth(1.0); // Clear everything
-    gl.enable(gl.DEPTH_TEST); // Enable depth testing
-    gl.depthFunc(gl.LEQUAL); // Near things obscure far things
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    helper.clear();
 
     const projectionMatrix = mat4.create();
     {
@@ -151,11 +151,15 @@ class World {
     helper.setUniform("lightDirection", [1, 2, 5]);
 
     for (const glObject of this.objects) {
+      glObject.update(deltaTime, time);
+
       helper.setUniform("viewMatrix", glObject.modelViewMatrix);
       helper.setUniform("modelToWorldMatrix", glObject.modelWorldMatrix);
       helper.setUniform("materialColor", glObject.materialColor);
-      helper.drawElements(glObject.indices.length);
+      helper.drawElements(glObject.indices.length, glObject);
     }
+
+    requestAnimationFrame(time => this.draw(time));
   }
 }
 
@@ -164,7 +168,7 @@ function main() {
   world.init();
   world.createObjects();
   world.addControllers();
-  world.draw();
+  requestAnimationFrame(time => world.draw(time));
 }
 
 if (document.readyState !== "loading") {

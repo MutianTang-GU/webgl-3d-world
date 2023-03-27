@@ -16,8 +16,5 @@ module.exports = (env, argv) => {
         },
       ],
     },
-    resolve: {
-      extensions: [".glsl"],
-    },
   };
 };

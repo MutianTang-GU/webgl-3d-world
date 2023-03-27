@@ -10,6 +10,7 @@ export default class {
       vertexShaderSource,
       fragmentShaderSource
     );
+    this.objectOffset = 0;
   }
 
   /**
@@ -121,6 +122,16 @@ export default class {
     gl.enableVertexAttribArray(normalAttributeLocation);
   }
 
+  clear() {
+    const gl = this.gl;
+    gl.clearDepth(1.0); // Clear everything
+    gl.enable(gl.DEPTH_TEST); // Enable depth testing
+    gl.depthFunc(gl.LEQUAL); // Near things obscure far things
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    this.objectOffset = 0;
+  }
+
   /**
    * @param {string} name
    * @param {Float32Array | number[] | number} value
@@ -142,6 +153,12 @@ export default class {
    */
   drawElements(length) {
     const gl = this.gl;
-    gl.drawElements(gl.TRIANGLES, length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(
+      gl.TRIANGLES,
+      length,
+      gl.UNSIGNED_SHORT,
+      this.objectOffset * 2 // 2 bytes per Uint16
+    );
+    this.objectOffset += length;
   }
 }
