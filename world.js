@@ -82,6 +82,7 @@ class World {
           this.camera.reset();
           break;
       }
+      event.preventDefault();
     });
   }
 
@@ -136,12 +137,18 @@ class World {
       const zFar = 100.0;
       mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
     }
-    const { position, latitude, longitude } = this.camera;
-    const [x, y, z] = position;
+    const { position, direction } = this.camera;
     const cameraMatrix = mat4.create();
-    mat4.rotateX(cameraMatrix, cameraMatrix, -latitude);
-    mat4.rotateY(cameraMatrix, cameraMatrix, longitude);
-    mat4.translate(cameraMatrix, cameraMatrix, [-x, -y, -z]);
+    mat4.lookAt(
+      cameraMatrix,
+      position,
+      [
+        position[0] + direction[0],
+        position[1] + direction[1],
+        position[2] + direction[2],
+      ],
+      [0, 1, 0]
+    );
 
     mat4.multiply(projectionMatrix, projectionMatrix, cameraMatrix);
 
@@ -150,7 +157,7 @@ class World {
     helper.setUniform("diffuseLightColor", [0.8, 0.8, 0.8]);
     helper.setUniform("lightDirection", [
       Math.sin(0.0005 * time),
-      .5,
+      0.5,
       Math.cos(0.0005 * time),
     ]);
 
